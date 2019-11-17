@@ -1,5 +1,5 @@
 # written by hackyu
-# eamils of stack_exchange leagues crawling
+# eamils of stack_exchange leagues crawling  (https://stackexchange.com/leagues/)
 # usage python 3.x
 # -*-encoding:utf-8-*-
 # Function Call Flow : main -> request_links -> request_emails
