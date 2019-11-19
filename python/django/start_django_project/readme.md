@@ -1,4 +1,4 @@
-#start_django_project
+# start_django_project
 
 
 ## django-admin startproject [Project Name]  
