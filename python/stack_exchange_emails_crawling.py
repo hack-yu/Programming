@@ -1,5 +1,5 @@
 # written by hackyu
-# eamils of stack_exchange leagues crawling  (https://stackexchange.com/leagues/)
+# eamils of stack_exchange leagues crawling
 # usage python 3.x
 # -*-encoding:utf-8-*-
 # Function Call Flow : main -> request_links -> request_emails
@@ -66,15 +66,16 @@ def request_emails(email_request_link, bb):                 # start function req
                         elif count == 2:
                             result = result+"."+result_list[index]
                             emails = emails+result+", "
-                            print ("\nFound It!!:", result, "Found Count: ", total_count, "\n")
-                            with open('a.txt','a') as f:
-                                f.write(result+"\n")           
+                            if result != "team@stackexchange.com":
+                                print ("\nFound It!!:", result, "Found Count: ", total_count, "\n")
+                                with open('a.txt','a') as f:
+                                    f.write(result+"\n")           
                         count = count+1
             i += 1
         except Exception as e:
             print(e)
-            print("Error! Continue Retry")
-            i -= 1
+            print("Error! Continue Retry request_emails")
+            #i -= 1
             continue                                        
 
 
@@ -141,6 +142,6 @@ if __name__ == "__main__":
 
             except Exception as e:
                 print(e)
-                print("Error! Continue Retry")
-                j -= 1
+                print("Error! Continue Retry main")
+                #j -= 1
                 continue
