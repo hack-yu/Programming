@@ -5,7 +5,6 @@
 # Function Call Flow : main -> request_links -> request_emails
 
 import re
-import time
 import requests
 import unicodedata
 from bs4 import BeautifulSoup
@@ -13,28 +12,28 @@ from bs4 import BeautifulSoup
 total_count = 0                                             # found email count increment.
 
 # Function request_emails
-def request_emails(email_request_link, bb):                 # start function requests_emails
+def request_emails(email_request_link, page_number):                 # start function requests_emails
     global total_count                                      # global variable
     urls = email_request_link                               # request links in index ex) pages of 1/week, pages of 2/week
     result_list_check = ""                                  # findall email regular expression in requests page.
     emails = ""                                             # result emails. 
     i = 0
-    numbers = 1                                             # Try Numbers.
+    user_numbers = 1                                             # Try Numbers.
     
     while i < len(urls):
         url = str(urls[i])[1:]                              # byte object to string
         url = url.replace("'","") 
     
         try:
-            print ("[Try Page:%d User:%d]" % (bb, numbers), "  ", url)
+            print ("[Try Page:%d User:%d]" % (page_number, user_numbers), "  ", url)
             res2 = requests.get(url)
             result_list_check = re.findall(r"(\w+[\w\.]*)@(\w+[\w\.]*)\.([A-Za-z]+)", res2.text) #regular expression email form
-            numbers = numbers+1
+            user_numbers = user_numbers+1
             
-            if not result_list_check:                           # not exist email form in page
-                print ("not exist")
+            # if not result_list_check:                           # not exist email form in page
+            #     print ("not exist")
             
-            else:
+            if result_list_check:
                 if "png" or "icon" in result_list_check:        # not email form delete
                     del result_list_check[0]
 
@@ -75,7 +74,6 @@ def request_emails(email_request_link, bb):                 # start function req
         except Exception as e:
             print(e)
             print("Error! Continue Retry request_emails")
-            #i -= 1
             continue                                        
 
 
@@ -83,7 +81,7 @@ def request_emails(email_request_link, bb):                 # start function req
 
 
 # Function request_links
-def request_links(url, params, bb):
+def request_links(url, params, page_number):
     res = requests.get(url, params=params)  
     soup = BeautifulSoup(res.text, "html.parser")
     link = soup.select("#leagueUserList > div > div.user.user > a")
@@ -94,8 +92,7 @@ def request_links(url, params, bb):
         href_tags = j.get("href")
         result = unicodedata.normalize('NFKD', href_tags).encode('ascii','ignore')
         email_request_link.append(result)
-    #time.sleep(2)
-    request_emails(email_request_link, bb)                                      # end function requests_links
+    request_emails(email_request_link, page_number)                                      # end function requests_links
 
 
 
@@ -106,13 +103,13 @@ if __name__ == "__main__":
     
     url = "https://stackexchange.com/leagues/"
     res = requests.get(url) 
-    soup = BeautifulSoup(res.text, "html.parser")
-    link = soup.select(".league-list > div > a")
+    soup = BeautifulSoup(res.text, "html.parser")   # response content or text html prase
+    link = soup.select(".league-list > div > a")    # tag base select
      
     # find leagues list
     for i in link:
         href_tags = i.get("href")
-        result = unicodedata.normalize('NFKD', href_tags).encode('ascii','ignore')
+        result = unicodedata.normalize('NFKD', href_tags).encode('ascii','ignore') 
         leagues_list.append(result)
     
 
@@ -121,12 +118,15 @@ if __name__ == "__main__":
         a = a.replace("'", "")
 
         j = 1
-        url = "https://stackexchange.com" + a
+        
+        url = "https://stackexchange.com" + a   # url setting
         print("url: ", url)
+        
         res = requests.get(url)
-        soup = BeautifulSoup(res.text, "html.parser")
-        page_numbers = soup.find_all('span', {'class': 'page-numbers'})
-        page_numbers = int(str(page_numbers[7]).replace("<span class=\"page-numbers\">", "").replace("</span>", ""))
+        soup = BeautifulSoup(res.text, "html.parser")   # response content or text html parse
+        
+        page_numbers = soup.find_all('span', {'class': 'page-numbers'}) # tag base find_all
+        page_numbers = int(str(page_numbers[7]).replace("<span class=\"page-numbers\">", "").replace("</span>", "")) # find max page_numbers
         print("page_numbers: ", page_numbers)
 
       
@@ -134,8 +134,7 @@ if __name__ == "__main__":
             params = { "page" : j }
             print ("\n===========================url: %s page: %d===========================\n" % (url, j))
             email_requests_link = []
-            #time.sleep(2)
-
+        
             try:
                 request_links(url, params, j) # call request_links
                 j += 1
